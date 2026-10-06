@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1B4F72">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SpanishDict">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Spanish Dictionary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #F7F6F3;
+  --surface: #FFFFFF;
+  --surface2: #EEF0F5;
+  --border: #DDE0E8;
+  --fg: #1A1F2E;
+  --fg2: #6B7280;
+  --fg3: #9CA3AF;
+  --accent: #1B4F72;
+  --accent-light: #D6E8F7;
+  --accent2: #15803D;
+  --accent2-light: #DCFCE7;
+  --tag-bg: #EEF0F5;
+  --tag-fg: #374151;
+  --pill-border: #CBD5E1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1117;
+    --surface: #1A1F2E;
+    --surface2: #252B3B;
+    --border: #2D3447;
+    --fg: #E8EAF0;
+    --fg2: #9CA3AF;
+    --fg3: #6B7280;
+    --accent: #3B82F6;
+    --accent-light: #1E3A5F;
+    --accent2: #22C55E;
+    --accent2-light: #14532D;
+    --tag-bg: #252B3B;
+    --tag-fg: #D1D5DB;
+    --pill-border: #374151;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1117;
+  --surface: #1A1F2E;
+  --surface2: #252B3B;
+  --border: #2D3447;
+  --fg: #E8EAF0;
+  --fg2: #9CA3AF;
+  --fg3: #6B7280;
+  --accent: #3B82F6;
+  --accent-light: #1E3A5F;
+  --accent2: #22C55E;
+  --accent2-light: #14532D;
+  --tag-bg: #252B3B;
+  --tag-fg: #D1D5DB;
+  --pill-border: #374151;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* HEADER */
+#header {
+  background: var(--accent);
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  flex-shrink: 0;
+  z-index: 10;
+}
+#header h1 {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+}
+#search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#search {
+  flex: 1;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+#search::placeholder { color: rgba(255,255,255,0.6); }
+#search:focus { background: rgba(255,255,255,0.22); }
+#count-badge {
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* FILTER BAR */
+#filter-bar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+#filter-bar::-webkit-scrollbar { display: none; }
+.filter-btn {
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  border: 1px solid var(--pill-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.filter-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+/* ALPHABET BAR */
+#alpha-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+#alpha-bar::-webkit-scrollbar { display: none; }
+.alpha-btn {
+  background: transparent;
+  color: var(--fg2);
+  border: none;
+  border-radius: 4px;
+  padding: 3px 5px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 20px;
+  text-align: center;
+}
+.alpha-btn:hover { background: var(--surface2); color: var(--fg); }
+.alpha-btn.active { background: var(--accent); color: #fff; }
+/* MAIN LIST */
+#list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.alpha-group { margin-bottom: 20px; }
+.alpha-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--fg3);
+  padding: 6px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+}
+.entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.entry-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.entry-en {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--fg);
+  flex: 1;
+}
+.cat-tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.cat-connector { background: var(--accent-light); color: var(--accent); }
+.cat-graph { background: #FEF3C7; color: #92400E; }
+.cat-verb-prep { background: #FCE7F3; color: #9D174D; }
+.cat-phrase { background: var(--accent2-light); color: var(--accent2); }
+.cat-grammar { background: #F3E8FF; color: #6B21A8; }
+.cat-register { background: #FEF9EC; color: #854D0E; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cat-graph { background: #3D2E00; color: #FCD34D; }
+  :root:not([data-theme="light"]) .cat-verb-prep { background: #3D0028; color: #F9A8D4; }
+  :root:not([data-theme="light"]) .cat-grammar { background: #2D1758; color: #D8B4FE; }
+  :root:not([data-theme="light"]) .cat-register { background: #3D2200; color: #FDE68A; }
+}
+:root[data-theme="dark"] .cat-graph { background: #3D2E00; color: #FCD34D; }
+:root[data-theme="dark"] .cat-verb-prep { background: #3D0028; color: #F9A8D4; }
+:root[data-theme="dark"] .cat-grammar { background: #2D1758; color: #D8B4FE; }
+:root[data-theme="dark"] .cat-register { background: #3D2200; color: #FDE68A; }
+.entry-es {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 500;
+}
+.entry-note {
+  font-size: 12px;
+  color: var(--fg2);
+  font-style: italic;
+}
+.highlight { background: #FEF08A; color: #713F12; border-radius: 2px; padding: 0 1px; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .highlight { background: #713F12; color: #FEF08A; }
+}
+:root[data-theme="dark"] .highlight { background: #713F12; color: #FEF08A; }
+#empty {
+  text-align: center;
+  color: var(--fg2);
+  padding: 60px 16px;
+  font-size: 15px;
+}
+/* theme toggle */
+#theme-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+<div id="header">
+  <h1>🇪🇸 Spanish Dictionary — UNLPE ONU III</h1>
+  <div id="search-row">
+    <input id="search" type="search" placeholder="Search English or Spanish…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <span id="count-badge">— entries</span>
+    <button id="theme-btn" onclick="cycleTheme()" title="Toggle theme">☀</button>
+  </div>
+</div>
+<div id="filter-bar">
+  <button class="filter-btn active" data-cat="all" onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn" data-cat="connector" onclick="setFilter('connector',this)">Connectors</button>
+  <button class="filter-btn" data-cat="graph" onclick="setFilter('graph',this)">Graph vocab</button>
+  <button class="filter-btn" data-cat="verb-prep" onclick="setFilter('verb-prep',this)">Verb + prep</button>
+  <button class="filter-btn" data-cat="phrase" onclick="setFilter('phrase',this)">Phrases</button>
+  <button class="filter-btn" data-cat="grammar" onclick="setFilter('grammar',this)">Grammar</button>
+  <button class="filter-btn" data-cat="register" onclick="setFilter('register',this)">Register / Email</button>
+</div>
+<div id="alpha-bar"></div>
+<div id="list-container"></div>
+
+<script>
+const THEME_KEY = 'dict-theme';
+function cycleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') || 'system';
+  const next = cur === 'system' ? 'dark' : cur === 'dark' ? 'light' : 'system';
+  if (next === 'system') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀' : next === 'light' ? '🌙' : '☀';
+  try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
+}
+try {
+  const t = localStorage.getItem(THEME_KEY);
+  if (t && t !== 'system') document.documentElement.setAttribute('data-theme', t);
+} catch(e) {}
+
+// ===== VOCABULARY DATABASE =====
+const VOCAB = [
+// ---- CONNECTORS (from model_responses docx) ----
+{en:"in the first place / first of all",es:"en primer lugar",cat:"connector",note:"sequence"},
+{en:"lastly / finally",es:"por último",cat:"connector",note:"sequence"},
+{en:"furthermore / moreover / in addition",es:"además",cat:"connector",note:"addition"},
+{en:"likewise / also",es:"asimismo",cat:"connector",note:"addition"},
+{en:"however",es:"sin embargo",cat:"connector",note:"contrast ★ key"},
+{en:"although / even though",es:"aunque",cat:"connector",note:"contrast — indicative (fact) / subjunctive (concession)"},
+{en:"since / given that",es:"dado que",cat:"connector",note:"cause + indicative"},
+{en:"since / because",es:"ya que",cat:"connector",note:"cause"},
+{en:"therefore",es:"por lo tanto",cat:"connector",note:"consequence ★ key"},
+{en:"as a result / consequently",es:"en consecuencia",cat:"connector",note:"consequence"},
+{en:"consequently",es:"por consiguiente",cat:"connector",note:"consequence + indicative"},
+{en:"hence",es:"de ahí que",cat:"connector",note:"consequence + subjunctive"},
+{en:"nevertheless / nonetheless",es:"no obstante",cat:"connector",note:"contrast ★ key"},
+{en:"while / whereas",es:"si bien",cat:"connector",note:"contrast + indicative"},
+{en:"so that / in order that",es:"para que",cat:"connector",note:"purpose + subjunctive ★"},
+{en:"so that / to the end that",es:"a fin de que",cat:"connector",note:"purpose + subjunctive"},
+{en:"in order to",es:"con el fin de",cat:"connector",note:"purpose + infinitive"},
+{en:"with a view to",es:"con miras a",cat:"connector",note:"purpose + infinitive"},
+{en:"in the event that / in case",es:"en caso de que",cat:"connector",note:"condition + subjunctive ★"},
+{en:"as long as / provided that",es:"siempre que",cat:"connector",note:"condition + subjunctive ★"},
+{en:"on condition that",es:"a condición de que",cat:"connector",note:"condition + subjunctive"},
+{en:"unless",es:"a menos que",cat:"connector",note:"condition + subjunctive"},
+{en:"when (future)",es:"cuando (futuro)",cat:"connector",note:"time + subjunctive ★"},
+{en:"before (that)",es:"antes de que",cat:"connector",note:"time + subjunctive ★"},
+{en:"once / as soon as",es:"una vez que",cat:"connector",note:"time — indicative (past) / subjunctive (future)"},
+{en:"as soon as",es:"en cuanto",cat:"connector",note:"time + subjunctive (future)"},
+{en:"following / as a result of",es:"a raíz de",cat:"connector",note:"cause + noun"},
+{en:"I consider that / I believe that",es:"considero que",cat:"connector",note:"opinion + indicative ★"},
+{en:"I don't think that",es:"no creo que",cat:"connector",note:"doubt + subjunctive ★"},
+{en:"it would be advisable that",es:"sería conveniente que",cat:"connector",note:"proposal + subjunctive ★"},
+{en:"it would be necessary to",es:"habría que",cat:"connector",note:"proposal + infinitive"},
+{en:"in short / in summary",es:"en definitiva",cat:"connector",note:"closing ★"},
+{en:"in summary",es:"en resumen",cat:"connector",note:"closing"},
+// ---- GRAPH VOCABULARY ----
+{en:"the chart shows / presents / illustrates",es:"el gráfico muestra / presenta / ilustra",cat:"graph",note:"introducing a chart"},
+{en:"the chart provides information about",es:"el gráfico proporciona información sobre",cat:"graph",note:"introducing"},
+{en:"the data refer to",es:"los datos se refieren a",cat:"graph",note:"introducing"},
+{en:"the chart compares",es:"el gráfico compara",cat:"graph",note:"introducing"},
+{en:"the period analysed covers X to Y",es:"el período analizado abarca de X a Y",cat:"graph",note:"introducing"},
+{en:"according to the data",es:"según los datos",cat:"graph",note:"introducing"},
+{en:"at first glance it can be seen that",es:"a primera vista, se observa que",cat:"graph",note:"introducing"},
+{en:"in general terms / overall",es:"en términos generales",cat:"graph",note:"introducing"},
+{en:"to increase",es:"aumentar / incrementarse",cat:"graph",note:"rise"},
+{en:"to grow",es:"crecer",cat:"graph",note:"rise"},
+{en:"to rise / go up",es:"subir",cat:"graph",note:"rise"},
+{en:"to experience an increase",es:"experimentar un aumento / un incremento",cat:"graph",note:"rise"},
+{en:"to record an increase",es:"registrar un aumento",cat:"graph",note:"rise"},
+{en:"to go from X to Y",es:"pasar de X a Y",cat:"graph",note:"movement"},
+{en:"to increase by X%",es:"aumentar en un X%",cat:"graph",note:"rise — note: EN not HASTA"},
+{en:"to increase to X%",es:"aumentar hasta el X%",cat:"graph",note:"rise — note: HASTA not EN"},
+{en:"to reach X",es:"alcanzar X",cat:"graph",note:"movement"},
+{en:"to reach a maximum / peak",es:"alcanzar un máximo / un pico",cat:"graph",note:"rise"},
+{en:"to decrease / to be reduced",es:"disminuir / reducirse",cat:"graph",note:"fall"},
+{en:"to fall / go down",es:"descender / bajar",cat:"graph",note:"fall"},
+{en:"to fall / drop",es:"caer",cat:"graph",note:"fall"},
+{en:"to experience / record a decline",es:"experimentar / registrar un descenso",cat:"graph",note:"fall"},
+{en:"to decrease by X%",es:"disminuir en un X%",cat:"graph",note:"fall"},
+{en:"to decrease to X%",es:"disminuir hasta el X%",cat:"graph",note:"fall"},
+{en:"to reach a low / minimum",es:"alcanzar un mínimo",cat:"graph",note:"fall"},
+{en:"to remain stable",es:"mantenerse estable",cat:"graph",note:"stability"},
+{en:"to remain virtually unchanged",es:"permanecer prácticamente sin cambios",cat:"graph",note:"stability"},
+{en:"to remain around X",es:"mantenerse en torno a X",cat:"graph",note:"stability"},
+{en:"to stabilise at X",es:"estabilizarse en X",cat:"graph",note:"stability"},
+{en:"to fluctuate",es:"fluctuar",cat:"graph",note:"fluctuation"},
+{en:"to experience fluctuations",es:"experimentar fluctuaciones",cat:"graph",note:"fluctuation"},
+{en:"to vary between X and Y",es:"variar entre X e Y",cat:"graph",note:"fluctuation"},
+{en:"slightly",es:"ligeramente / levemente",cat:"graph",note:"intensity"},
+{en:"gradually",es:"gradualmente / de forma gradual",cat:"graph",note:"intensity"},
+{en:"steadily",es:"de forma constante / sostenida",cat:"graph",note:"intensity"},
+{en:"considerably / notably",es:"considerablemente / notablemente",cat:"graph",note:"intensity"},
+{en:"significantly",es:"significativamente",cat:"graph",note:"intensity"},
+{en:"sharply",es:"bruscamente / de forma pronunciada",cat:"graph",note:"intensity"},
+{en:"a slight increase / decrease",es:"un ligero aumento / descenso",cat:"graph",note:"intensity"},
+{en:"a considerable increase / decrease",es:"un aumento / descenso considerable",cat:"graph",note:"intensity"},
+{en:"compared with",es:"en comparación con",cat:"graph",note:"comparison"},
+{en:"compared with / versus",es:"frente a",cat:"graph",note:"comparison"},
+{en:"whereas / while",es:"mientras que",cat:"graph",note:"comparison"},
+{en:"by contrast",es:"en cambio",cat:"graph",note:"comparison"},
+{en:"on the contrary / by contrast",es:"por el contrario",cat:"graph",note:"comparison"},
+{en:"higher / lower than",es:"superior / inferior a",cat:"graph",note:"comparison"},
+{en:"more than double / almost double",es:"más del doble / casi el doble",cat:"graph",note:"comparison"},
+{en:"the highest / lowest figure",es:"la cifra más alta / más baja",cat:"graph",note:"comparison"},
+{en:"to account for a larger / smaller proportion",es:"representar una proporción mayor / menor",cat:"graph",note:"comparison"},
+{en:"the difference between X and Y",es:"la diferencia entre X e Y",cat:"graph",note:"comparison"},
+{en:"percentage / proportion",es:"el porcentaje / la proporción",cat:"graph",note:"numbers"},
+{en:"figure / data point",es:"la cifra / el dato",cat:"graph",note:"numbers"},
+{en:"to account for / represent X%",es:"representar / suponer el X%",cat:"graph",note:"numbers"},
+{en:"to stand at X%",es:"situarse en el X%",cat:"graph",note:"numbers"},
+{en:"approximately / around",es:"aproximadamente / alrededor de",cat:"graph",note:"numbers"},
+{en:"just over / just under",es:"algo más de / algo menos de",cat:"graph",note:"numbers"},
+{en:"almost / close to",es:"casi / cerca de",cat:"graph",note:"numbers"},
+{en:"the majority / a minority",es:"la mayoría / una minoría",cat:"graph",note:"numbers"},
+{en:"a quarter / a third / half",es:"una cuarta parte / un tercio / la mitad",cat:"graph",note:"numbers"},
+{en:"it is worth highlighting that",es:"cabe destacar que",cat:"graph",note:"highlighting"},
+{en:"it should be noted that",es:"conviene señalar que",cat:"graph",note:"highlighting"},
+{en:"the most noteworthy point is that",es:"lo más destacable es que",cat:"graph",note:"highlighting"},
+{en:"a clear trend can be observed",es:"se observa una clara tendencia",cat:"graph",note:"highlighting"},
+{en:"the most significant change occurs in",es:"el cambio más significativo se produce en",cat:"graph",note:"highlighting"},
+{en:"X records the highest / lowest figure",es:"X registra la cifra más alta / baja",cat:"graph",note:"highlighting"},
+{en:"particularly noteworthy is",es:"destaca especialmente",cat:"graph",note:"highlighting"},
+{en:"the data suggest that",es:"los datos sugieren que",cat:"graph",note:"cautious interpretation"},
+{en:"this could indicate that",es:"esto podría indicar que",cat:"graph",note:"cautious interpretation"},
+{en:"this trend may be due to",es:"esta tendencia puede deberse a",cat:"graph",note:"cautious interpretation"},
+{en:"however the chart does not allow us to determine",es:"no obstante, el gráfico no permite determinar",cat:"graph",note:"cautious interpretation"},
+{en:"it cannot be concluded from these data alone that",es:"no se puede concluir únicamente a partir de estos datos que",cat:"graph",note:"cautious interpretation"},
+{en:"it would be necessary to take into account",es:"habría que tener en cuenta",cat:"graph",note:"cautious interpretation"},
+{en:"overall the data show that",es:"en conjunto, los datos muestran que",cat:"graph",note:"conclusion"},
+{en:"overall it can be observed",es:"en términos generales, se observa",cat:"graph",note:"conclusion"},
+{en:"in short the main trend is",es:"en definitiva, la tendencia principal es",cat:"graph",note:"conclusion"},
+{en:"therefore it can be stated that",es:"por lo tanto, puede afirmarse que",cat:"graph",note:"conclusion"},
+{en:"in summary X increased whereas Y decreased",es:"en resumen, X aumentó, mientras que Y disminuyó",cat:"graph",note:"conclusion template"},
+// ---- VERBS WITH PREPOSITIONS ----
+{en:"to alternate with",es:"alternar con",cat:"verb-prep",note:"+ CON"},
+{en:"to be enough / suffice with",es:"bastar con",cat:"verb-prep",note:"+ CON"},
+{en:"to marry",es:"casarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to agree / coincide with",es:"coincidir con",cat:"verb-prep",note:"+ CON"},
+{en:"to collaborate with",es:"colaborar con",cat:"verb-prep",note:"+ CON"},
+{en:"to compare with",es:"comparar con",cat:"verb-prep",note:"+ CON"},
+{en:"to share with",es:"compartir con",cat:"verb-prep",note:"+ CON"},
+{en:"to connect with",es:"conectar con",cat:"verb-prep",note:"+ CON"},
+{en:"to make do with / settle for",es:"conformarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to confuse with",es:"confundir con",cat:"verb-prep",note:"+ CON"},
+{en:"to count on / have available",es:"contar con",cat:"verb-prep",note:"+ CON"},
+{en:"to fulfil / comply with",es:"cumplir con",cat:"verb-prep",note:"+ CON"},
+{en:"to come across / meet",es:"encontrarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to get angry with",es:"enfadarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to amuse oneself with",es:"entretenerse con",cat:"verb-prep",note:"+ CON"},
+{en:"to get enthusiastic about",es:"entusiasmarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to feel uncomfortable with",es:"incomodarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to get along with",es:"llevarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to make up with / reconcile with",es:"reconciliarse con",cat:"verb-prep",note:"+ CON"},
+{en:"to dream of / about",es:"soñar con",cat:"verb-prep",note:"+ CON"},
+{en:"to deal with",es:"tratar con",cat:"verb-prep",note:"+ CON"},
+{en:"to abuse / take advantage of",es:"abusar de",cat:"verb-prep",note:"+ DE"},
+{en:"to remember",es:"acordarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to be glad about",es:"alegrarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to take advantage of",es:"aprovecharse de",cat:"verb-prep",note:"+ DE"},
+{en:"to regret",es:"arrepentirse de",cat:"verb-prep",note:"+ DE"},
+{en:"to be frightened by",es:"asustarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to warn / notify of",es:"avisar de",cat:"verb-prep",note:"+ DE"},
+{en:"to be ashamed of",es:"avergonzarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to get tired of",es:"cansarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to lack",es:"carecer de",cat:"verb-prep",note:"+ DE"},
+{en:"to take care of",es:"cuidar de",cat:"verb-prep",note:"+ DE"},
+{en:"to realise",es:"darse cuenta de",cat:"verb-prep",note:"+ DE"},
+{en:"to depend on",es:"depender de",cat:"verb-prep",note:"+ DE"},
+{en:"to distrust",es:"desconfiar de",cat:"verb-prep",note:"+ DE"},
+{en:"to say goodbye to",es:"despedirse de",cat:"verb-prep",note:"+ DE"},
+{en:"to enjoy",es:"disfrutar de",cat:"verb-prep",note:"+ DE"},
+{en:"to fall in love with",es:"enamorarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to take charge of",es:"encargarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to find out about",es:"enterarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to escape from",es:"escapar de",cat:"verb-prep",note:"+ DE"},
+{en:"to trust",es:"fiarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to talk about",es:"hablar de",cat:"verb-prep",note:"+ DE"},
+{en:"to get fed up with",es:"hartarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to inform of / about",es:"informar de",cat:"verb-prep",note:"+ DE"},
+{en:"to be dying of",es:"morirse de",cat:"verb-prep",note:"+ DE"},
+{en:"to forget",es:"olvidarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to worry about / take care of",es:"preocuparse de",cat:"verb-prep",note:"+ DE"},
+{en:"to boast of",es:"presumir de",cat:"verb-prep",note:"+ DE"},
+{en:"to complain about",es:"quejarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to laugh at",es:"reírse de",cat:"verb-prep",note:"+ DE"},
+{en:"to disown / go back on",es:"renegar de",cat:"verb-prep",note:"+ DE"},
+{en:"to know about",es:"saber de",cat:"verb-prep",note:"+ DE"},
+{en:"to be surprised by",es:"sorprenderse de",cat:"verb-prep",note:"+ DE"},
+{en:"to look forward to / feel like",es:"tener ganas de",cat:"verb-prep",note:"+ DE"},
+{en:"to take revenge for",es:"vengarse de",cat:"verb-prep",note:"+ DE"},
+{en:"to delve into",es:"adentrarse en",cat:"verb-prep",note:"+ EN"},
+{en:"to trust in",es:"confiar en",cat:"verb-prep",note:"+ EN"},
+{en:"to consist of",es:"consistir en",cat:"verb-prep",note:"+ EN"},
+{en:"to believe in",es:"creer en",cat:"verb-prep",note:"+ EN"},
+{en:"to graduate in",es:"diplomarse en",cat:"verb-prep",note:"+ EN"},
+{en:"to insist on / be determined to",es:"empeñarse en",cat:"verb-prep",note:"+ EN"},
+{en:"to interfere in",es:"entrometerse en",cat:"verb-prep",note:"+ EN"},
+{en:"to notice / pay attention to",es:"fijarse en",cat:"verb-prep",note:"+ EN"},
+{en:"to influence",es:"influir en",cat:"verb-prep",note:"+ EN"},
+{en:"to insist on",es:"insistir en",cat:"verb-prep",note:"+ EN"},
+{en:"to participate in",es:"participar en",cat:"verb-prep",note:"+ EN"},
+{en:"to agree to",es:"quedar en",cat:"verb-prep",note:"+ EN"},
+{en:"to take long to / be slow to",es:"tardar en",cat:"verb-prep",note:"+ EN"},
+{en:"to agree to / access",es:"acceder a",cat:"verb-prep",note:"+ A"},
+{en:"to get used to",es:"acostumbrarse a",cat:"verb-prep",note:"+ A"},
+{en:"to adapt to",es:"adaptarse a",cat:"verb-prep",note:"+ A"},
+{en:"to risk",es:"arriesgarse a",cat:"verb-prep",note:"+ A"},
+{en:"to aspire to",es:"aspirar a",cat:"verb-prep",note:"+ A"},
+{en:"to dare to",es:"atreverse a",cat:"verb-prep",note:"+ A"},
+{en:"to commit to",es:"comprometerse a",cat:"verb-prep",note:"+ A"},
+{en:"to connect to",es:"conectarse a",cat:"verb-prep",note:"+ A"},
+{en:"to make up one's mind to",es:"decidirse a",cat:"verb-prep",note:"+ A"},
+{en:"to dedicate oneself to",es:"dedicarse a",cat:"verb-prep",note:"+ A"},
+{en:"to address / head towards",es:"dirigirse a",cat:"verb-prep",note:"+ A"},
+{en:"to start to",es:"empezar a",cat:"verb-prep",note:"+ A"},
+{en:"to face",es:"enfrentarse a",cat:"verb-prep",note:"+ A"},
+{en:"to be going to",es:"ir a",cat:"verb-prep",note:"+ A"},
+{en:"to play at",es:"jugar a",cat:"verb-prep",note:"+ A"},
+{en:"to refuse to",es:"negarse a",cat:"verb-prep",note:"+ A"},
+{en:"to smell of / smack of",es:"oler a",cat:"verb-prep",note:"+ A"},
+{en:"to prefer to",es:"preferir a",cat:"verb-prep",note:"+ A"},
+{en:"to resort to",es:"recurrir a",cat:"verb-prep",note:"+ A"},
+{en:"to give up / renounce",es:"renunciar a",cat:"verb-prep",note:"+ A"},
+{en:"to resist",es:"resistirse a",cat:"verb-prep",note:"+ A"},
+{en:"to taste of / sound like",es:"saber a",cat:"verb-prep",note:"+ A"},
+// ---- USEFUL PHRASES / REGISTER ----
+{en:"I am writing to you regarding",es:"me dirijo a usted en relación con",cat:"register",note:"formal opening"},
+{en:"I am writing to you on behalf of",es:"me dirijo a usted en nombre de",cat:"register",note:"formal opening"},
+{en:"I am writing to you to express my interest in",es:"me dirijo a usted para expresar mi interés en",cat:"register",note:"formal opening"},
+{en:"I am writing to you to request",es:"me dirijo a usted para solicitar",cat:"register",note:"formal opening"},
+{en:"I am writing to you to recommend",es:"me dirijo a usted para recomendar",cat:"register",note:"formal opening"},
+{en:"As agreed / as we agreed",es:"como acordamos",cat:"register",note:"note to colleague"},
+{en:"I remain at your disposal",es:"quedo a su disposición",cat:"register",note:"formal closing"},
+{en:"I remain at your disposal for any additional information",es:"quedo a su disposición para facilitar cualquier información adicional",cat:"register",note:"formal closing"},
+{en:"Do not hesitate to contact us",es:"no duden en ponerse en contacto con nosotros",cat:"register",note:"formal closing — plural"},
+{en:"Do not hesitate to contact me",es:"no dude en ponerse en contacto conmigo",cat:"register",note:"formal closing — singular"},
+{en:"Thank you in advance for your attention",es:"muchas gracias de antemano por su atención",cat:"register",note:"formal closing"},
+{en:"We are aware of the time this request requires",es:"somos conscientes del tiempo que requiere esta solicitud",cat:"register",note:"formal body"},
+{en:"Kind regards",es:"atentamente / saludos cordiales",cat:"register",note:"closing salutation"},
+{en:"Dear [name]",es:"estimada/o [nombre]",cat:"register",note:"formal salutation"},
+{en:"To whom it may concern",es:"a quien corresponda",cat:"register",note:"formal salutation — impersonal"},
+{en:"Thank you for having invited me",es:"muchas gracias por haberme invitado",cat:"register",note:"formal — perfect infinitive"},
+{en:"I regret the inconvenience this may cause",es:"lamento los inconvenientes que esto pueda ocasionar",cat:"register",note:"apology phrase"},
+{en:"we sincerely regret the inconvenience",es:"lamentamos sinceramente los inconvenientes",cat:"register",note:"institutional apology"},
+{en:"I would like to propose in my place",es:"me gustaría proponer en mi lugar a",cat:"register",note:"declining + substituting"},
+{en:"due to previous professional commitments",es:"debido a compromisos profesionales previos",cat:"register",note:"reason for declining"},
+{en:"I am unable to participate on the dates indicated",es:"me resulta imposible participar en las fechas indicadas",cat:"register",note:"declining"},
+{en:"I would like you to consider my application",es:"me gustaría que considerara mi candidatura",cat:"register",note:"application phrase + subjunctive"},
+{en:"I have worked with him/her for [period]",es:"he trabajado con ella/él durante [período]",cat:"register",note:"recommendation letter"},
+{en:"I am convinced that his/her participation would bring important value",es:"estoy convencida de que su participación aportaría un valor importante",cat:"register",note:"recommendation"},
+{en:"I am pleased to say that",es:"me complace señalar que",cat:"register",note:"positive register"},
+{en:"the staff are informed that",es:"se informa a todo el personal de",cat:"register",note:"circular — impersonal"},
+{en:"in relation to this matter",es:"en relación con este asunto",cat:"register",note:"formal reference"},
+{en:"it is recommended that",es:"se recomienda que",cat:"register",note:"circular — impersonal + subjunctive"},
+{en:"those interested may",es:"las personas interesadas pueden",cat:"register",note:"circular"},
+{en:"it is worth noting that",es:"cabe señalar que",cat:"register",note:"formal observation"},
+{en:"in this context",es:"en este contexto",cat:"register",note:"framing phrase"},
+{en:"in the framework of",es:"en el marco de",cat:"register",note:"formal framing"},
+// ---- GRAMMAR STRUCTURES ----
+{en:"I consider that [+ indicative]",es:"considero que [+ indicativo]",cat:"grammar",note:"opinion → assert + indicative"},
+{en:"I don't believe that [+ subjunctive]",es:"no creo que [+ subjuntivo]",cat:"grammar",note:"doubt → subjunctive"},
+{en:"it is essential that [+ subjunctive]",es:"es fundamental que [+ subjuntivo]",cat:"grammar",note:"valuation → subjunctive"},
+{en:"it would be advisable that [+ subjunctive]",es:"sería conveniente que [+ subjuntivo]",cat:"grammar",note:"conditional courtesy + subjunctive"},
+{en:"if [imperfect subjunctive] … could [conditional]",es:"si [imp. subj.] … se podría [condicional]",cat:"grammar",note:"hypothesis — Si se invirtiera más, se podría..."},
+{en:"although [fact] / although [concession]",es:"aunque [indicativo] / aunque [subjuntivo]",cat:"grammar",note:"aunque: fact = indicative; concession = subjunctive"},
+{en:"so that [+ subjunctive]",es:"para que [+ subjuntivo]",cat:"grammar",note:"purpose clause"},
+{en:"in the event that [+ subjunctive]",es:"en caso de que [+ subjuntivo]",cat:"grammar",note:"conditional clause"},
+{en:"we are looking for someone who [+ subjunctive]",es:"buscamos a alguien que [+ subjuntivo]",cat:"grammar",note:"relative clause — non-specific referent"},
+{en:"given that [fact] … therefore [consequence]",es:"dado que [hecho] … por lo tanto [consecuencia]",cat:"grammar",note:"cause + consequence chain"},
+{en:"opinion + indicative → assert",es:"Considero que esta medida es necesaria",cat:"grammar",note:"B2-C1 structure: affirm opinion"},
+{en:"negation + subjunctive → doubt",es:"No creo que esta medida sea suficiente",cat:"grammar",note:"B2-C1 structure: express doubt"},
+{en:"valuation + subjunctive → recommendation",es:"Es fundamental que los Estados adopten medidas",cat:"grammar",note:"B2-C1 structure: recommend"},
+{en:"conditional courtesy + subjunctive → formal proposal",es:"Sería conveniente que se revisara el sistema",cat:"grammar",note:"B2-C1 structure: formal proposal"},
+// ---- PHRASES (reusable templates) ----
+{en:"to introduce a topic",es:"el tema de [X] es especialmente relevante porque…",cat:"phrase",note:"topic intro"},
+{en:"to give an opinion",es:"desde mi punto de vista… / considero que…",cat:"phrase",note:"opinion opener"},
+{en:"to nuance / qualify",es:"aunque [X], creo que…",cat:"phrase",note:"concession"},
+{en:"to add a point",es:"además, conviene tener en cuenta que…",cat:"phrase",note:"addition"},
+{en:"to make a proposal",es:"sería conveniente que [subj.] / habría que [inf.]",cat:"phrase",note:"proposal"},
+{en:"to express a hypothesis",es:"si se [imp. subj.], se podría [inf.]",cat:"phrase",note:"hypothesis"},
+{en:"to express a consequence",es:"por lo tanto, sería necesario…",cat:"phrase",note:"consequence"},
+{en:"to close / conclude",es:"en definitiva, considero fundamental combinar [X] con [Y]",cat:"phrase",note:"closing phrase"},
+{en:"to summarise the text",es:"el texto señala que [idea 1]. Además, destaca que [idea 2]",cat:"phrase",note:"summarising a text"},
+{en:"from my point of view [opinion]",es:"desde mi punto de vista [+ opinión]",cat:"phrase",note:"opinion"},
+{en:"I consider that [argument] because [reason]",es:"considero que [argumento] porque [razón]",cat:"phrase",note:"argue a point"},
+{en:"although [counterpoint] I believe that [position]",es:"aunque [matiz/contrapunto], creo que [posición]",cat:"phrase",note:"concede + counter"},
+{en:"therefore it would be necessary",es:"por ello, sería conveniente que [subjuntivo]",cat:"phrase",note:"consequence + proposal"},
+{en:"at an institutional level it would be advisable that",es:"a nivel institucional, sería conveniente que [subj.]",cat:"phrase",note:"institutional proposal"},
+{en:"at an individual level it would be necessary to",es:"a nivel individual, habría que [inf.]",cat:"phrase",note:"individual recommendation"},
+{en:"if these measures were adopted it would be possible to",es:"si se adoptaran estas medidas, se podría [resultado]",cat:"phrase",note:"hypothesis outcome"},
+{en:"there is no single solution but I consider it fundamental to combine",es:"no existe una solución única, pero considero fundamental combinar [A] con [B]",cat:"phrase",note:"closing argument"},
+{en:"as I summarise for you the most relevant points",es:"como acordamos, te resumo los puntos más relevantes del texto sobre [tema]",cat:"phrase",note:"note to colleague — opening"},
+{en:"from my point of view [opinion] I consider that [argument]",es:"desde mi punto de vista, [opinión]. Considero que [argumento]",cat:"phrase",note:"colleague note — opinion section"},
+{en:"I look forward to the meeting",es:"espero con interés la reunión",cat:"phrase",note:"positive anticipation"},
+{en:"convening to discuss together how we can",es:"convencido/a de que nos aportará ideas valiosas sobre cómo podemos",cat:"phrase",note:"meeting anticipation"},
+{en:"team-building activity",es:"actividad de team building",cat:"phrase",note:"HR / team context"},
+{en:"to strengthen teamwork",es:"reforzar nuestro trabajo en equipo",cat:"phrase",note:"team context"},
+{en:"informal periodic meetings",es:"reuniones informales periódicas",cat:"phrase",note:"team suggestion"},
+{en:"shared space (virtual or in-person)",es:"espacio compartido, ya sea virtual o presencial",cat:"phrase",note:"team suggestion"},
+{en:"to reconnect in a different environment",es:"reconectar en un entorno distinto al habitual",cat:"phrase",note:"team-building"},
+{en:"flexibility of working hours",es:"la flexibilización de los horarios",cat:"phrase",note:"work conditions"},
+{en:"teleworking",es:"el teletrabajo",cat:"phrase",note:"work conditions"},
+{en:"digital literacy",es:"la alfabetización digital",cat:"phrase",note:"technology / social topic"},
+{en:"digital inclusion",es:"la inclusión digital",cat:"phrase",note:"technology / social topic"},
+{en:"to reduce inequalities",es:"reducir desigualdades",cat:"phrase",note:"SDG / policy topic"},
+{en:"Sustainable Development Goals (SDGs)",es:"los Objetivos de Desarrollo Sostenible (ODS)",cat:"phrase",note:"UN context"},
+{en:"2030 Agenda",es:"la Agenda 2030",cat:"phrase",note:"UN context"},
+{en:"the person selected will join the team of",es:"la persona seleccionada se incorporará al equipo de",cat:"phrase",note:"vacancy announcement"},
+{en:"the main responsibility will be",es:"tendrá como principal responsabilidad",cat:"phrase",note:"vacancy announcement"},
+{en:"knowledge of [language 1] is essential while [language 2] is an advantage",es:"el dominio de [idioma 1] es imprescindible, mientras que [idioma 2] constituye una ventaja",cat:"phrase",note:"vacancy — languages"},
+{en:"this is a good opportunity for professionals who wish to",es:"se trata de una buena oportunidad para profesionales que deseen",cat:"phrase",note:"vacancy — closing"},
+{en:"in short this is a good opportunity",es:"en definitiva, se trata de una buena oportunidad para",cat:"phrase",note:"vacancy closing"},
+];
+
+// ===== STATE =====
+let currentFilter = 'all';
+let currentAlpha = 'all';
+let searchTerm = '';
+
+const catLabels = {
+  connector: 'Connector',
+  graph: 'Graph vocab',
+  'verb-prep': 'Verb + prep',
+  phrase: 'Phrase',
+  grammar: 'Grammar',
+  register: 'Register'
+};
+
+function catClass(cat) {
+  return 'cat-' + cat;
+}
+
+function getFiltered() {
+  let data = VOCAB;
+  if (currentFilter !== 'all') data = data.filter(e => e.cat === currentFilter);
+  if (currentAlpha !== 'all') {
+    data = data.filter(e => e.en.charAt(0).toLowerCase() === currentAlpha);
+  }
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    data = data.filter(e =>
+      e.en.toLowerCase().includes(q) ||
+      e.es.toLowerCase().includes(q) ||
+      (e.note && e.note.toLowerCase().includes(q))
+    );
+  }
+  return data.sort((a, b) => a.en.localeCompare(b.en));
+}
+
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  return text.replace(re, '<span class="highlight">$1</span>');
+}
+
+function buildAlphaBar() {
+  const bar = document.getElementById('alpha-bar');
+  const letters = [...new Set(VOCAB.map(e => e.en.charAt(0).toLowerCase()))].sort();
+  let html = `<button class="alpha-btn ${currentAlpha==='all'?'active':''}" onclick="setAlpha('all',this)">All</button>`;
+  letters.forEach(l => {
+    html += `<button class="alpha-btn ${currentAlpha===l?'active':''}" onclick="setAlpha('${l}',this)">${l.toUpperCase()}</button>`;
+  });
+  bar.innerHTML = html;
+}
+
+function render() {
+  const data = getFiltered();
+  const q = searchTerm.toLowerCase();
+  document.getElementById('count-badge').textContent = data.length + ' entries';
+
+  const list = document.getElementById('list-container');
+
+  if (data.length === 0) {
+    list.innerHTML = '<div id="empty">No entries found. Try a different search or filter.</div>';
+    return;
+  }
+
+  // Group by first letter
+  const groups = {};
+  data.forEach(e => {
+    const l = e.en.charAt(0).toUpperCase();
+    if (!groups[l]) groups[l] = [];
+    groups[l].push(e);
+  });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(letter => {
+    html += `<div class="alpha-group">`;
+    html += `<div class="alpha-header">${letter}</div>`;
+    groups[letter].forEach(e => {
+      const enH = highlight(e.en, q);
+      const esH = highlight(e.es, q);
+      const noteH = e.note ? highlight(e.note, q) : '';
+      html += `<div class="entry">
+        <div class="entry-main">
+          <span class="entry-en">${enH}</span>
+          <span class="cat-tag ${catClass(e.cat)}">${catLabels[e.cat]}</span>
+        </div>
+        <div class="entry-es">${esH}</div>
+        ${e.note ? `<div class="entry-note">${noteH}</div>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  list.innerHTML = html;
+}
+
+function setFilter(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentAlpha = 'all';
+  buildAlphaBar();
+  render();
+}
+
+function setAlpha(l, btn) {
+  currentAlpha = l;
+  document.querySelectorAll('.alpha-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value.trim();
+  currentAlpha = 'all';
+  buildAlphaBar();
+  render();
+});
+
+buildAlphaBar();
+render();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/SpanishDict/sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
